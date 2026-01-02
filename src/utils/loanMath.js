@@ -35,22 +35,16 @@ function generateAmortizationSchedule(
   let month = 0;
   const MAX_ITERATIONS = 1200; // 100 years safety limit
 
-  while (remainingDebt > 0.01 && month < MAX_ITERATIONS) {
-    if (maxMonths !== null && month >= maxMonths) {
-      // If we've reached max months but debt remains, return error
-      return {
-        schedule: [],
-        totalPayment: 0,
-        totalInterest: 0,
-        months: 0,
-        error: 'Loan cannot be paid off within the specified term',
-      };
-    }
-
+  // When maxMonths is specified, run up to that many months but stop early if debt is paid off.
+  // Otherwise, run until debt is paid off.
+  while (
+    month < MAX_ITERATIONS &&
+    (maxMonths !== null ? month < maxMonths && remainingDebt > 0.01 : remainingDebt > 0.01)
+  ) {
     const interest = calculateMonthlyInterest(remainingDebt, interestRate);
     
     // Check if monthly payment is less than interest (infinite loan)
-    if (monthlyPayment < interest && annualExtraPayment === 0) {
+    if (monthlyPayment < interest && annualExtraPayment === 0 && maxMonths === null) {
       return {
         schedule: [],
         totalPayment: 0,
@@ -69,15 +63,18 @@ function generateAmortizationSchedule(
       extraPayment = annualExtraPayment;
     }
 
-    // Ensure we don't overpay
+    // Ensure we don't overpay when debt is nearly zero
     const totalMonthPayment = principal + extraPayment;
-    if (totalMonthPayment > remainingDebt) {
+    if (totalMonthPayment > remainingDebt && remainingDebt > 0) {
       principal = remainingDebt;
       extraPayment = 0;
     }
 
     remainingDebt -= principal + extraPayment;
-    totalPayment += monthlyPayment + extraPayment;
+    remainingDebt = Math.max(0, remainingDebt);
+
+    const actualMonthlyPayment = principal + interest;
+    totalPayment += actualMonthlyPayment + extraPayment;
     totalInterest += interest;
 
     const currentDate = addMonths(startDate, month);
@@ -88,7 +85,7 @@ function generateAmortizationSchedule(
       interest,
       principal,
       extraPayment,
-      remainingDebt: Math.max(0, remainingDebt),
+      remainingDebt,
     });
 
     month++;
@@ -205,6 +202,14 @@ export function calculateMonthlyPayment(
       continue;
     }
 
+    // If the loan is paid off before the requested term, the payment is too high.
+    // (This used to look like a perfect solution because remainingDebt was clamped to 0.)
+    if (result.schedule.length < loanTermMonths) {
+      high = mid;
+      iterations++;
+      continue;
+    }
+
     const finalDebt = result.schedule[result.schedule.length - 1]?.remainingDebt || 0;
 
     // If we're within tolerance, we've found the answer
@@ -277,6 +282,13 @@ export function calculateMaxLoanAmount(
       continue;
     }
 
+    // If the loan is paid off before the requested term, we can afford a larger loan.
+    if (result.schedule.length < loanTermMonths) {
+      low = mid;
+      iterations++;
+      continue;
+    }
+
     const finalDebt = result.schedule[result.schedule.length - 1]?.remainingDebt || 0;
 
     // If we're within tolerance and debt is close to 0, we've found the answer
@@ -294,12 +306,12 @@ export function calculateMaxLoanAmount(
       };
     }
 
-    // If debt is positive, we can afford a larger loan
+    // If debt is positive, the loan amount is too high
     if (finalDebt > tolerance) {
-      low = mid;
-    } else {
-      // If we've overpaid, reduce the loan amount
       high = mid;
+    } else {
+      // If we've overpaid, we can afford a larger loan
+      low = mid;
     }
 
     iterations++;

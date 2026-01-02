@@ -93,18 +93,18 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 py-8 px-4 text-slate-100">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-sky-300 to-indigo-300 bg-clip-text text-transparent mb-2">
             Loan Calculator
           </h1>
-          <p className="text-slate-600 text-lg">Calculate your loan terms, payments, and more</p>
+          <p className="text-slate-300 text-lg">Calculate your loan terms, payments, and more</p>
         </div>
 
         {/* Tabs */}
         <div className="mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-2">
+          <div className="bg-slate-900/60 rounded-lg border border-slate-800 p-2">
             <nav className="flex space-x-2" aria-label="Tabs">
               {tabs.map((tab) => (
                 <button
@@ -114,8 +114,8 @@ function App() {
                     flex-1 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200
                     ${
                       activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        ? 'bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-md'
+                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-slate-100'
                     }
                   `}
                 >
@@ -129,10 +129,10 @@ function App() {
         {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Input Forms */}
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+          <div className="bg-slate-900/60 rounded-xl p-8 border border-slate-800">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
-              <h2 className="text-2xl font-bold text-slate-800">
+              <div className="w-1 h-8 bg-gradient-to-b from-sky-400 to-indigo-400 rounded-full"></div>
+              <h2 className="text-2xl font-bold text-slate-100">
                 Input Parameters
               </h2>
             </div>
@@ -141,20 +141,20 @@ function App() {
             {activeTab === 'loanTerm' && (
               <div className="space-y-4 min-h-[520px]">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Loan Amount
                   </label>
                   <input
                     type="number"
                     value={loanAmount}
                     onChange={(e) => setLoanAmount(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="200000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Interest Rate (%)
                   </label>
                   <input
@@ -162,52 +162,52 @@ function App() {
                     step="0.01"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="5.0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Monthly Payment
                   </label>
                   <input
                     type="number"
                     value={monthlyPayment}
                     onChange={(e) => setMonthlyPayment(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="1200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Annual Extra Payment
                   </label>
                   <input
                     type="number"
                     value={annualExtraPayment}
                     onChange={(e) => setAnnualExtraPayment(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Start Date
                   </label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-slate-950/40 hover:bg-slate-950/60"
                   />
                 </div>
 
                 <button 
                   onClick={handleCalculate}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-indigo-600 hover:to-sky-600 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
                 >
                   Calculate Loan Term
                 </button>
@@ -218,20 +218,20 @@ function App() {
             {activeTab === 'monthlyPayment' && (
               <div className="space-y-4 min-h-[520px]">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Loan Amount
                   </label>
                   <input
                     type="number"
                     value={loanAmount2}
                     onChange={(e) => setLoanAmount2(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="200000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Interest Rate (%)
                   </label>
                   <input
@@ -239,52 +239,52 @@ function App() {
                     step="0.01"
                     value={interestRate2}
                     onChange={(e) => setInterestRate2(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="5.0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Loan Term (Months)
                   </label>
                   <input
                     type="number"
                     value={loanTermMonths}
                     onChange={(e) => setLoanTermMonths(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="240"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Annual Extra Payment
                   </label>
                   <input
                     type="number"
                     value={annualExtraPayment2}
                     onChange={(e) => setAnnualExtraPayment2(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Start Date
                   </label>
                   <input
                     type="date"
                     value={startDate2}
                     onChange={(e) => setStartDate2(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-slate-950/40 hover:bg-slate-950/60"
                   />
                 </div>
 
                 <button 
                   onClick={handleCalculate}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-indigo-600 hover:to-sky-600 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
                 >
                   Calculate Monthly Payment
                 </button>
@@ -295,20 +295,20 @@ function App() {
             {activeTab === 'maxLoanAmount' && (
               <div className="space-y-4 min-h-[520px]">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Monthly Payment
                   </label>
                   <input
                     type="number"
                     value={monthlyPayment3}
                     onChange={(e) => setMonthlyPayment3(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="1500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Interest Rate (%)
                   </label>
                   <input
@@ -316,52 +316,52 @@ function App() {
                     step="0.01"
                     value={interestRate3}
                     onChange={(e) => setInterestRate3(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="5.0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Loan Term (Months)
                   </label>
                   <input
                     type="number"
                     value={loanTermMonths3}
                     onChange={(e) => setLoanTermMonths3(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="240"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Annual Extra Payment
                   </label>
                   <input
                     type="number"
                     value={annualExtraPayment3}
                     onChange={(e) => setAnnualExtraPayment3(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all [appearance:textfield] bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 placeholder:text-slate-500 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all [appearance:textfield] bg-slate-950/40 hover:bg-slate-950/60"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Start Date
                   </label>
                   <input
                     type="date"
                     value={startDate3}
                     onChange={(e) => setStartDate3(e.target.value)}
-                    className="w-full p-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-slate-50 hover:bg-white"
+                    className="w-full p-3 border-2 border-slate-800 text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-slate-950/40 hover:bg-slate-950/60"
                   />
                 </div>
 
                 <button 
                   onClick={handleCalculate}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-indigo-600 hover:to-sky-600 transition-all shadow-md hover:shadow-lg mt-6 transform hover:scale-[1.02]"
                 >
                   Calculate Max Loan Amount
                 </button>
@@ -370,16 +370,16 @@ function App() {
           </div>
 
           {/* Right Column: Results Dashboard */}
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+          <div className="bg-slate-900/60 rounded-xl p-8 border border-slate-800">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
-              <h2 className="text-2xl font-bold text-slate-800">
+              <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-sky-400 rounded-full"></div>
+              <h2 className="text-2xl font-bold text-slate-100">
                 Results Dashboard
               </h2>
             </div>
             
             {error && (
-              <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-lg mb-6 shadow-sm">
+              <div className="bg-gradient-to-r from-red-950/60 to-rose-950/60 border-2 border-red-900/60 text-red-200 px-5 py-4 rounded-lg mb-6 shadow-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">⚠️</span>
                   <span className="font-medium">{error}</span>
@@ -390,7 +390,7 @@ function App() {
             {!results && !error && (
               <div className="text-center py-16 min-h-[600px] flex flex-col items-center justify-center">
                 <div className="text-6xl mb-4">📊</div>
-                <p className="text-slate-500 text-lg font-medium">Results will appear here after calculation</p>
+                <p className="text-slate-300 text-lg font-medium">Results will appear here after calculation</p>
                 <p className="text-slate-400 text-sm mt-2">Fill in the parameters and click calculate</p>
               </div>
             )}
@@ -399,7 +399,7 @@ function App() {
               <div className="space-y-8 min-h-[600px]">
                 {/* Key Metrics Grid */}
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-slate-100 mb-5 flex items-center gap-2">
                     <span className="text-2xl">💰</span>
                     Key Metrics
                   </h3>
@@ -471,18 +471,18 @@ function App() {
 
                 {/* Chart */}
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-slate-100 mb-5 flex items-center gap-2">
                     <span className="text-2xl">📈</span>
                     Loan Progress
                   </h3>
-                  <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border-2 border-slate-200">
+                  <div className="bg-slate-950/40 rounded-xl p-4 border-2 border-slate-800 text-slate-300">
                     <LoanChart schedule={results.schedule} />
                   </div>
                 </div>
 
                 {/* Amortization Schedule */}
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-slate-100 mb-5 flex items-center gap-2">
                     <span className="text-2xl">📋</span>
                     Amortization Schedule
                   </h3>
@@ -500,9 +500,9 @@ function App() {
 // Metric Card Component
 function MetricCard({ label, value }) {
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-5 border-2 border-slate-200 hover:border-blue-300 transition-all hover:shadow-md">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{label}</p>
-      <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{value}</p>
+    <div className="bg-gradient-to-br from-slate-950/60 to-slate-900/60 rounded-xl p-5 border-2 border-slate-800 hover:border-sky-600/60 transition-all hover:shadow-md">
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</p>
+      <p className="text-2xl font-bold bg-gradient-to-r from-sky-300 to-indigo-300 bg-clip-text text-transparent">{value}</p>
     </div>
   )
 }
@@ -528,14 +528,20 @@ function LoanChart({ schedule }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.2} />
         <XAxis 
           dataKey="year" 
           label={{ value: 'Years', position: 'insideBottom', offset: -5 }} 
+          tick={{ fill: 'currentColor' }}
+          axisLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
+          tickLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
         />
         <YAxis 
           label={{ value: 'Amount (€)', angle: -90, position: 'insideLeft', offset: 10 }} 
           width={80}
+          tick={{ fill: 'currentColor' }}
+          axisLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
+          tickLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
         />
         <Tooltip 
           formatter={(value) => formatCurrency(value)}
@@ -564,35 +570,37 @@ function LoanChart({ schedule }) {
 // Amortization Table Component
 function AmortizationTable({ schedule }) {
   return (
-    <div className="overflow-auto max-h-96 border-2 border-slate-200 rounded-xl shadow-sm">
+    <div className="overflow-auto max-h-96 border-2 border-slate-800 rounded-xl shadow-sm bg-slate-950/20">
       <table className="w-full text-sm">
-        <thead className="bg-gradient-to-r from-slate-100 to-slate-50 sticky top-0">
+        <thead className="bg-gradient-to-r from-slate-950 to-slate-900 sticky top-0">
           <tr>
-            <th className="text-left px-4 py-3 font-bold text-slate-700">Month</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-700">Interest</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-700">Principal</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-700">Remaining Debt</th>
+            <th className="text-left px-4 py-3 font-bold text-slate-200">Month</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200">Interest</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200">Principal</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200">Remaining Debt</th>
           </tr>
         </thead>
         <tbody>
           {schedule.map((row, index) => (
             <tr 
               key={index}
-              className={`border-t border-slate-200 ${
-                row.extraPayment > 0 ? 'bg-gradient-to-r from-blue-50 to-indigo-50 font-semibold' : 'hover:bg-slate-50'
+              className={`border-t border-slate-800 ${
+                row.extraPayment > 0
+                  ? 'bg-gradient-to-r from-indigo-950/40 to-slate-900/40 font-semibold'
+                  : 'hover:bg-slate-900/40'
               }`}
             >
-              <td className="px-4 py-3">
+              <td className="px-4 py-3 text-slate-200">
                 {format(row.date, 'MMM yyyy')}
                 {row.extraPayment > 0 && (
-                  <span className="ml-2 text-xs text-blue-700 font-semibold">
+                  <span className="ml-2 text-xs text-sky-300 font-semibold">
                     (+{formatCurrency(row.extraPayment)} extra)
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3 text-right">{formatCurrency(row.interest)}</td>
-              <td className="px-4 py-3 text-right">{formatCurrency(row.principal)}</td>
-              <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.remainingDebt)}</td>
+              <td className="px-4 py-3 text-right text-slate-200">{formatCurrency(row.interest)}</td>
+              <td className="px-4 py-3 text-right text-slate-200">{formatCurrency(row.principal)}</td>
+              <td className="px-4 py-3 text-right font-semibold text-slate-100">{formatCurrency(row.remainingDebt)}</td>
             </tr>
           ))}
         </tbody>
