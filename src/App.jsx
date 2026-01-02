@@ -423,7 +423,7 @@ function App() {
                     <span className="text-2xl">💰</span>
                     Key Metrics
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {activeTab === 'loanTerm' && (
                       <>
                         <MetricCard 
@@ -520,9 +520,11 @@ function App() {
 // Metric Card Component
 function MetricCard({ label, value }) {
   return (
-    <div className="bg-gradient-to-br from-slate-950/60 to-slate-900/60 rounded-xl p-5 border-2 border-slate-800 hover:border-sky-600/60 transition-all hover:shadow-md">
+    <div className="bg-gradient-to-br from-slate-950/60 to-slate-900/60 rounded-xl p-4 sm:p-5 border-2 border-slate-800 hover:border-sky-600/60 transition-all hover:shadow-md">
       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</p>
-      <p className="text-2xl font-bold bg-gradient-to-r from-sky-300 to-indigo-300 bg-clip-text text-transparent">{value}</p>
+      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-300 to-indigo-300 bg-clip-text text-transparent break-words whitespace-normal leading-tight tabular-nums">
+        {value}
+      </p>
     </div>
   )
 }
@@ -547,7 +549,7 @@ function LoanChart({ schedule }) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart data={chartData}>
+      <ComposedChart data={chartData} margin={{ top: 8, right: 12, bottom: 8, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.2} />
         <XAxis 
           dataKey="year" 
@@ -558,7 +560,7 @@ function LoanChart({ schedule }) {
         />
         <YAxis 
           label={{ value: 'Amount (€)', angle: -90, position: 'insideLeft', offset: 10 }} 
-          width={80}
+          width={92}
           tick={{ fill: 'currentColor' }}
           axisLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
           tickLine={{ stroke: 'currentColor', strokeOpacity: 0.35 }}
@@ -591,13 +593,13 @@ function LoanChart({ schedule }) {
 function AmortizationTable({ schedule }) {
   return (
     <div className="scrollbar-dark overflow-auto max-h-96 border-2 border-slate-800 rounded-xl shadow-sm bg-slate-950/20">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm min-w-max">
         <thead className="bg-gradient-to-r from-slate-950 to-slate-900 sticky top-0">
           <tr>
-            <th className="text-left px-4 py-3 font-bold text-slate-200">Month</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-200">Interest</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-200">Principal</th>
-            <th className="text-right px-4 py-3 font-bold text-slate-200">Remaining Debt</th>
+            <th className="text-left px-4 py-3 font-bold text-slate-200 whitespace-nowrap">Month</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200 whitespace-nowrap">Interest</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200 whitespace-nowrap">Principal</th>
+            <th className="text-right px-4 py-3 font-bold text-slate-200 whitespace-nowrap">Remaining Debt</th>
           </tr>
         </thead>
         <tbody>
@@ -610,7 +612,7 @@ function AmortizationTable({ schedule }) {
                   : 'hover:bg-slate-900/40'
               }`}
             >
-              <td className="px-4 py-3 text-slate-200">
+              <td className="px-4 py-3 text-slate-200 whitespace-nowrap">
                 {format(row.date, 'MMM yyyy')}
                 {row.extraPayment > 0 && (
                   <span className="ml-2 text-xs text-sky-300 font-semibold">
@@ -618,9 +620,9 @@ function AmortizationTable({ schedule }) {
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3 text-right text-slate-200">{formatCurrency(row.interest)}</td>
-              <td className="px-4 py-3 text-right text-slate-200">{formatCurrency(row.principal)}</td>
-              <td className="px-4 py-3 text-right font-semibold text-slate-100">{formatCurrency(row.remainingDebt)}</td>
+              <td className="px-4 py-3 text-right text-slate-200 whitespace-nowrap tabular-nums">{formatCurrency(row.interest)}</td>
+              <td className="px-4 py-3 text-right text-slate-200 whitespace-nowrap tabular-nums">{formatCurrency(row.principal)}</td>
+              <td className="px-4 py-3 text-right font-semibold text-slate-100 whitespace-nowrap tabular-nums">{formatCurrency(row.remainingDebt)}</td>
             </tr>
           ))}
         </tbody>
