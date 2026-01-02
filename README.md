@@ -1,16 +1,55 @@
-# React + Vite
+# Loan Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + Vite loan calculator with three calculation modes, an amortization schedule, and a results dashboard.
 
-Currently, two official plugins are available:
+## Calculation Modes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Loan Term**: Calculate loan duration from loan amount, interest rate, monthly payment, and optional annual extra payment.
+- **Monthly Payment**: Calculate the required monthly payment for a given loan amount, interest rate, loan term, and optional annual extra payment.
+- **Max Loan Amount**: Calculate the maximum loan amount affordable for a given monthly payment, interest rate, loan term, and optional annual extra payment.
 
-## React Compiler
+Each mode provides totals (payment + interest), repayment rate, a chart, and a full amortization schedule.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- Vite + React
+- Tailwind CSS
+- Recharts
+- date-fns
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+- `src/App.jsx`: UI (tabs, forms, results)
+- `src/utils/loanMath.js`: all calculations + schedule generation
+- `src/utils/constants.js`: currency formatting (default: `€`)
+
+## Business Rules (high level)
+
+- Monthly interest: `(remainingDebt * annualRate) / 100 / 12`
+- Principal each month: `monthlyPayment - interest`
+- Annual extra payment is applied at the end of each loan year (month 12, 24, 36, ... relative to the start date)
+- Repayment rate: `(firstMonthPrincipal * 12) / loanAmount`
+
+## Local Development
+
+	npm install
+	npm run dev
+
+Other useful commands:
+
+	npm run build
+	npm run preview
+	npm run lint
+
+## Docker
+
+The Docker image is a multi-stage build (Vite build → Nginx static hosting).
+
+	docker build -t loan-calculator:local .
+	docker run --rm -p 8080:80 loan-calculator:local
+
+Open: http://localhost:8080
+
+## Notes
+
+- There is a `src/utils/loanMath.test.js` file, but the repo does not currently define an `npm test` script or test runner configuration.
