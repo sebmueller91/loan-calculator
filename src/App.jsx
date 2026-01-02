@@ -570,7 +570,7 @@ function LoanChart({ schedule }) {
 // Amortization Table Component
 function AmortizationTable({ schedule }) {
   return (
-    <div className="overflow-auto max-h-96 border-2 border-slate-800 rounded-xl shadow-sm bg-slate-950/20">
+    <div className="scrollbar-dark overflow-auto max-h-96 border-2 border-slate-800 rounded-xl shadow-sm bg-slate-950/20">
       <table className="w-full text-sm">
         <thead className="bg-gradient-to-r from-slate-950 to-slate-900 sticky top-0">
           <tr>
