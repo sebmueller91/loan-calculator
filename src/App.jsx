@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { format, startOfMonth } from 'date-fns'
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { calculateLoanTerm, calculateMonthlyPayment, calculateMaxLoanAmount } from './utils/loanMath'
@@ -7,6 +7,7 @@ import './App.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState('loanTerm')
+  const hasInitialCalculationRun = useRef(false)
   
   // Option 1: Loan Term inputs
   const [loanAmount, setLoanAmount] = useState('150000')
@@ -39,12 +40,20 @@ function App() {
     { id: 'maxLoanAmount', label: 'Max Loan Amount' },
   ]
 
-  const handleCalculate = () => {
+  const tabDescription =
+    activeTab === 'loanTerm'
+      ? 'Find out how long it takes to pay off a loan with a given monthly payment.'
+      : activeTab === 'monthlyPayment'
+        ? 'Calculate the monthly payment needed to pay off a loan within a fixed term.'
+        : 'Estimate the maximum loan amount you can afford for a fixed monthly payment and term.'
+
+  const handleCalculate = (tabIdOrEvent) => {
+    const tabId = typeof tabIdOrEvent === 'string' ? tabIdOrEvent : activeTab
     setError(null)
     setResults(null)
 
     try {
-      if (activeTab === 'loanTerm') {
+      if (tabId === 'loanTerm') {
         const result = calculateLoanTerm(
           parseFloat(loanAmount),
           parseFloat(interestRate),
@@ -58,7 +67,7 @@ function App() {
         } else {
           setResults(result)
         }
-      } else if (activeTab === 'monthlyPayment') {
+      } else if (tabId === 'monthlyPayment') {
         const result = calculateMonthlyPayment(
           parseFloat(loanAmount2),
           parseFloat(interestRate2),
@@ -72,7 +81,7 @@ function App() {
         } else {
           setResults(result)
         }
-      } else if (activeTab === 'maxLoanAmount') {
+      } else if (tabId === 'maxLoanAmount') {
         const result = calculateMaxLoanAmount(
           parseFloat(monthlyPayment3),
           parseFloat(interestRate3),
@@ -92,6 +101,12 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (hasInitialCalculationRun.current) return
+    hasInitialCalculationRun.current = true
+    handleCalculate('loanTerm')
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 py-8 px-4 text-slate-100">
       <div className="max-w-7xl mx-auto">
@@ -109,7 +124,10 @@ function App() {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    handleCalculate(tab.id)
+                  }}
                   className={`
                     flex-1 py-3 px-4 rounded-md font-medium text-sm transition-all duration-200
                     ${
@@ -124,6 +142,8 @@ function App() {
               ))}
             </nav>
           </div>
+
+          <p className="mt-3 text-slate-300 text-sm text-center">{tabDescription}</p>
         </div>
 
         {/* 2-Column Layout */}
