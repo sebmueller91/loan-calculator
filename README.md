@@ -82,7 +82,3 @@ The calculator uses standard financial formulas:
 | Remaining Debt | `B = P(1+r)^n - M((1+r)^n - 1) / r` |
 
 Where: P = principal, r = monthly interest rate, n = term in months, M = monthly payment
-
-## License
-
-ISC
