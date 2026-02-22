@@ -25,12 +25,12 @@ export interface CalculatorValues {
 }
 
 const defaultValues: CalculatorValues = {
-  loanAmount: "",
-  interestRate: "",
-  monthlyPayment: "",
-  loanTerm: "",
-  amortization: "",
-  extraPayment: "0",
+  loanAmount: "150000",
+  interestRate: "3",
+  monthlyPayment: "1000",
+  loanTerm: "120",
+  amortization: "1",
+  extraPayment: "1000",
   startDate: new Date().toISOString().split("T")[0],
   activeMode: 0,
 };
