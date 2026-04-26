@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 interface InputFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
   suffix?: string;
   placeholder?: string;
+  step?: string;
 }
 
 export default function InputField({
@@ -14,29 +17,44 @@ export default function InputField({
   onChange,
   suffix,
   placeholder,
+  step = "any",
 }: InputFieldProps) {
+  const [focus, setFocus] = useState(false);
+
   return (
-    <div className="flex items-center justify-between py-2.5 px-1">
-      <label className="text-sm text-text-secondary font-medium">{label}</label>
-      <div className="flex items-center gap-1.5">
+    <label
+      className="block cursor-text"
+      style={{
+        borderRadius: "var(--r-md)",
+        border: `1.5px solid ${focus ? "var(--color-primary)" : "var(--color-line)"}`,
+        background: "var(--color-surface)",
+        padding: "10px 14px",
+        minHeight: "var(--field-h)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        transition: "border-color .15s ease, box-shadow .15s ease",
+        boxShadow: focus ? "0 0 0 3px color-mix(in oklch, var(--color-primary) 18%, transparent)" : "none",
+      }}
+    >
+      <div className="text-[11px] text-muted font-semibold tracking-wide">{label}</div>
+      <div className="flex items-baseline gap-1.5 mt-0.5">
         <input
-          type="text"
+          type="number"
           inputMode="decimal"
+          step={step}
           value={value}
-          onChange={(e) => {
-            // Allow digits, dots, commas, and minus
-            const filtered = e.target.value.replace(/[^0-9.,-]/g, "");
-            onChange(filtered);
-          }}
+          onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-28 text-right text-sm font-semibold text-primary bg-transparent
-                     border-b-2 border-border focus:border-primary-light outline-none
-                     py-1 px-1 transition-colors"
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
+          className="flex-1 min-w-0 border-none outline-none bg-transparent text-text text-lg font-semibold p-0"
+          style={{ fontVariantNumeric: "tabular-nums" }}
         />
         {suffix && (
-          <span className="text-xs text-text-secondary font-medium w-6 text-left">{suffix}</span>
+          <div className="text-sm text-text-secondary font-medium">{suffix}</div>
         )}
       </div>
-    </div>
+    </label>
   );
 }

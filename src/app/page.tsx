@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CalculatorTab from "@/components/CalculatorTab";
 import ScheduleTab from "@/components/ScheduleTab";
 import ChartTab from "@/components/ChartTab";
 import InfoTab from "@/components/InfoTab";
 import SettingsTab from "@/components/SettingsTab";
-import { type CalculationResult } from "@/lib/calculations";
+import { calculateFull, type CalculationResult } from "@/lib/calculations";
 import { useSettings } from "@/lib/settings";
 import { usePersistedState } from "@/lib/usePersistedState";
-import { t, type TranslationKey } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 type Tab = "calculator" | "schedule" | "chart" | "info" | "settings";
 
@@ -25,65 +25,103 @@ export interface CalculatorValues {
 }
 
 const defaultValues: CalculatorValues = {
-  loanAmount: "150000",
-  interestRate: "3",
-  monthlyPayment: "1000",
-  loanTerm: "120",
+  loanAmount: "250000",
+  interestRate: "3.5",
+  monthlyPayment: "1200",
+  loanTerm: "300",
   amortization: "1",
-  extraPayment: "1000",
+  extraPayment: "0",
   startDate: new Date().toISOString().split("T")[0],
   activeMode: 0,
 };
 
-const tabDefs: { id: Tab; labelKey: TranslationKey; icon: React.ReactNode }[] = [
-  {
-    id: "calculator",
-    labelKey: "nav.calculator",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <text x="3" y="18" fontSize="16" fontWeight="bold" fill="currentColor" stroke="none">&#931;</text>
-      </svg>
-    ),
-  },
-  {
-    id: "schedule",
-    labelKey: "nav.schedule",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h10M4 18h7" />
-      </svg>
-    ),
-  },
-  {
-    id: "chart",
-    labelKey: "nav.chart",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8" />
-      </svg>
-    ),
-  },
-  {
-    id: "info",
-    labelKey: "nav.info",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" />
-        <path strokeLinecap="round" d="M12 16v-4M12 8h.01" />
-      </svg>
-    ),
-  },
-  {
-    id: "settings",
-    labelKey: "nav.settings",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
+const modes = ["loanTerm", "monthlyPayment", "amount", "remainingDebt", "constructionFinancing"] as const;
+
+// Icons
+function IconCalc({ size = 20, strokeWidth = 1.6 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="2.5" />
+      <rect x="7" y="6" width="10" height="3.2" rx="0.8" />
+      <circle cx="8.2" cy="13" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="13" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="15.8" cy="13" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="8.2" cy="17" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="15.8" cy="17" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconList({ size = 20, strokeWidth = 1.6 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2.5" />
+      <path d="M3 9h18" />
+      <path d="M9 4v16" />
+      <path d="M3 14h18" />
+    </svg>
+  );
+}
+
+function IconChart({ size = 20, strokeWidth = 1.6 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19V5" />
+      <path d="M4 19h16" />
+      <path d="M7 15c2-1 3-5 5-5s3 3 5 1.5 4-4.5 4-4.5" />
+    </svg>
+  );
+}
+
+function IconInfo({ size = 20, strokeWidth = 1.6 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <circle cx="12" cy="8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconSettings({ size = 20, strokeWidth = 1.6 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" />
+    </svg>
+  );
+}
+
+export function LogoMark({ size = 44 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 44 44" fill="none">
+      <rect x="0" y="0" width="44" height="44" rx="12" className="fill-primary" />
+      <path d="M14 28c0-8 6-14 16-14-1 9-7 14-16 14z" className="fill-primary-ink" opacity="0.92" />
+      <path d="M14 28c2-3 5-6 9-8" className="stroke-primary" strokeWidth="1.4" strokeLinecap="round" />
+      <circle cx="14" cy="28" r="1.6" className="fill-primary" />
+    </svg>
+  );
+}
+
+const tabDefs: { id: Tab; labelKey: string; Icon: typeof IconCalc }[] = [
+  { id: "calculator", labelKey: "nav.calculator", Icon: IconCalc },
+  { id: "schedule", labelKey: "nav.schedule", Icon: IconList },
+  { id: "chart", labelKey: "nav.chart", Icon: IconChart },
+  { id: "info", labelKey: "nav.info", Icon: IconInfo },
+  { id: "settings", labelKey: "nav.settings", Icon: IconSettings },
 ];
+
+function tabSubtitle(tab: Tab, lang: "en" | "de"): string {
+  const subtitles: Record<Tab, Record<string, string>> = {
+    calculator: { en: "Plan your repayment", de: "Planen Sie Ihre Ruckzahlung" },
+    schedule: { en: "Month-by-month breakdown", de: "Monatliche Aufstellung" },
+    chart: { en: "Lifetime trajectory", de: "Gesamtverlauf" },
+    info: { en: "About this app", de: "Uber diese App" },
+    settings: { en: "Preferences", de: "Einstellungen" },
+  };
+  return subtitles[tab][lang] || subtitles[tab].en;
+}
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("calculator");
@@ -92,40 +130,99 @@ export default function Home() {
   const { settings } = useSettings();
   const lang = settings.language;
 
+  // Live calculation - recompute whenever values change
+  const computeResult = useCallback(() => {
+    const v = (key: keyof CalculatorValues) => {
+      const raw = (values[key] as string).replace(",", ".");
+      return parseFloat(raw) || 0;
+    };
+    const startDate = values.startDate ? new Date(values.startDate + "T00:00:00") : new Date();
+    const mode = modes[values.activeMode];
+
+    try {
+      const r = calculateFull({
+        mode,
+        loanAmount: v("loanAmount"),
+        annualInterestRate: v("interestRate"),
+        monthlyPayment: v("monthlyPayment"),
+        loanTermMonths: v("loanTerm"),
+        amortizationRate: v("amortization"),
+        annualExtraPayment: v("extraPayment"),
+        startDate,
+      });
+      return r;
+    } catch {
+      return null;
+    }
+  }, [values]);
+
+  useEffect(() => {
+    const r = computeResult();
+    setResult(r);
+  }, [computeResult]);
+
+  const currentTab = tabDefs.find((td) => td.id === activeTab)!;
+
   return (
-    <div className="h-dvh flex flex-col max-w-lg mx-auto shadow-2xl">
-      {/* Top navigation bar */}
-      <header className="bg-primary shrink-0">
-        <div className="flex">
-          {tabDefs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors relative
-                ${activeTab === tab.id ? "text-white" : "text-white/50 hover:text-white/70"}`}
-            >
-              {tab.icon}
-              <span className="text-[10px] font-medium">{t(tab.labelKey, lang)}</span>
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-white rounded-full" />
-              )}
-            </button>
-          ))}
+    <div className="h-dvh flex flex-col max-w-lg mx-auto shadow-2xl bg-bg overflow-hidden">
+      {/* Top navigation */}
+      <header className="bg-surface shrink-0 border-b border-line pt-3.5">
+        {/* Title row */}
+        <div className="flex items-center gap-3 px-4.5 pb-3.5">
+          <LogoMark size={36} />
+          <div className="flex-1">
+            <div className="font-serif text-[22px] font-medium text-text leading-tight tracking-tight">
+              {t(currentTab.labelKey as Parameters<typeof t>[0], lang)}
+            </div>
+            <div className="text-[11px] text-muted mt-0.5">
+              {tabSubtitle(activeTab, lang)}
+            </div>
+          </div>
+        </div>
+
+        {/* Tab strip */}
+        <div className="grid grid-cols-5 bg-surface">
+          {tabDefs.map((tab) => {
+            const active = tab.id === activeTab;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="flex flex-col items-center gap-1 py-2.5 px-1 relative cursor-pointer border-none bg-transparent"
+                style={{ color: active ? "var(--color-primary)" : "var(--color-text-secondary)" }}
+              >
+                <tab.Icon size={20} strokeWidth={active ? 2 : 1.6} />
+                <span
+                  className="text-[10.5px] tracking-wide"
+                  style={{ fontWeight: active ? 600 : 500 }}
+                >
+                  {t(tab.labelKey as Parameters<typeof t>[0], lang)}
+                </span>
+                {active && (
+                  <span className="absolute bottom-0 left-[20%] right-[20%] h-[2.5px] bg-primary rounded-t-sm" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </header>
 
       {/* Content area */}
-      <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-bg">
         {activeTab === "calculator" && (
           <CalculatorTab
             values={values}
             onValuesChange={setValues}
-            onResult={setResult}
+            result={result}
             onShowSchedule={() => setActiveTab("schedule")}
           />
         )}
-        {activeTab === "schedule" && <ScheduleTab result={result} />}
-        {activeTab === "chart" && <ChartTab result={result} />}
+        {activeTab === "schedule" && (
+          <ScheduleTab result={result} onGoCalc={() => setActiveTab("calculator")} />
+        )}
+        {activeTab === "chart" && (
+          <ChartTab result={result} onGoCalc={() => setActiveTab("calculator")} />
+        )}
         {activeTab === "info" && <InfoTab />}
         {activeTab === "settings" && <SettingsTab />}
       </main>

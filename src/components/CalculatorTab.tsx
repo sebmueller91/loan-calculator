@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useEffect } from "react";
 import InputField from "./InputField";
 import DateField from "./DateField";
-import { calculateFull, type CalculationResult } from "@/lib/calculations";
+import { type CalculationResult } from "@/lib/calculations";
 import { formatCurrency, formatPercent, formatMonths, formatDate } from "@/lib/format";
 import { useSettings } from "@/lib/settings";
 import { t, getLocale, type TranslationKey } from "@/lib/i18n";
@@ -69,17 +69,15 @@ const modes: ModeConfig[] = [
 interface CalculatorTabProps {
   values: CalculatorValues;
   onValuesChange: (values: CalculatorValues | ((prev: CalculatorValues) => CalculatorValues)) => void;
-  onResult: (result: CalculationResult | null) => void;
+  result: CalculationResult | null;
   onShowSchedule: () => void;
 }
 
-export default function CalculatorTab({ values, onValuesChange, onResult, onShowSchedule }: CalculatorTabProps) {
+export default function CalculatorTab({ values, onValuesChange, result, onShowSchedule }: CalculatorTabProps) {
   const { settings, currencySymbol } = useSettings();
   const lang = settings.language;
   const locale = getLocale(lang);
   const decimals = settings.decimalPlaces;
-
-  const [result, setResult] = useState<CalculationResult | null>(null);
 
   const activeMode = values.activeMode;
   const mode = modes[activeMode];
@@ -94,129 +92,103 @@ export default function CalculatorTab({ values, onValuesChange, onResult, onShow
     onValuesChange((prev) => ({ ...prev, [key]: val }));
   };
 
-  const doCalculate = (): CalculationResult => {
-    const v = (key: keyof CalculatorValues) => {
-      const raw = (values[key] as string).replace(",", ".");
-      return parseFloat(raw) || 0;
-    };
-    const startDate = values.startDate ? new Date(values.startDate + "T00:00:00") : new Date();
-
-    return calculateFull({
-      mode: mode.id,
-      loanAmount: v("loanAmount"),
-      annualInterestRate: v("interestRate"),
-      monthlyPayment: v("monthlyPayment"),
-      loanTermMonths: v("loanTerm"),
-      amortizationRate: v("amortization"),
-      annualExtraPayment: v("extraPayment"),
-      startDate,
-    });
-  };
-
-  const handleCalculate = () => {
-    const calcResult = doCalculate();
-    setResult(calcResult);
-    onResult(calcResult);
-  };
-
-  const handleShowSchedule = () => {
-    const calcResult = doCalculate();
-    setResult(calcResult);
-    onResult(calcResult);
-    onShowSchedule();
-  };
-
   const fmtCur = (v: number) => `${formatCurrency(v, locale, decimals)} ${currencySymbol}`;
 
+  const modeHints: Record<string, Record<string, string>> = {
+    loanTerm: { en: "Solves for term", de: "Berechnet Laufzeit" },
+    monthlyPayment: { en: "Solves for payment", de: "Berechnet Rate" },
+    amount: { en: "Solves for amount", de: "Berechnet Betrag" },
+    remainingDebt: { en: "Snapshot calc", de: "Momentaufnahme" },
+    constructionFinancing: { en: "Phased draw", de: "Phasenweise" },
+  };
+
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Mode tabs */}
-      <div className="bg-primary shrink-0 overflow-x-auto scrollbar-hide">
-        <div className="flex min-w-max">
-          {modes.map((m, i) => (
-            <button
-              key={m.id}
-              onClick={() => {
-                onValuesChange((prev) => ({ ...prev, activeMode: i }));
-                setResult(null);
-                onResult(null);
-              }}
-              className={`px-4 py-2.5 text-xs font-bold tracking-wide whitespace-nowrap transition-colors
-                ${i === activeMode
-                  ? "text-white border-b-3 border-white"
-                  : "text-white/60 hover:text-white/80"
-                }`}
-            >
-              {t(m.labelKey, lang).toUpperCase()}
-            </button>
-          ))}
+    <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-4.5 px-4 pt-1 pb-7">
+        {/* Mode chips */}
+        <ModeStrip
+          activeMode={activeMode}
+          onChange={(i) => onValuesChange((prev) => ({ ...prev, activeMode: i }))}
+          lang={lang}
+        />
+
+        {/* Inputs */}
+        <div>
+          <SectionLabel hint={modeHints[mode.id]?.[lang] || modeHints[mode.id]?.en}>
+            {lang === "de" ? "Eingaben" : "Inputs"}
+          </SectionLabel>
+          <Card>
+            <div className="flex flex-col" style={{ gap: "var(--gap)" }}>
+              {mode.fields.map((field) => (
+                <InputField
+                  key={field.key}
+                  label={t(field.labelKey, lang)}
+                  value={values[field.key] as string}
+                  onChange={(v) => updateValue(field.key, v)}
+                  suffix={getSuffix(field.suffixType)}
+                  step={field.suffixType === "percent" ? "0.01" : "any"}
+                />
+              ))}
+            </div>
+          </Card>
         </div>
-      </div>
 
-      {/* Scrollable form content */}
-      <div className="flex-1 overflow-y-auto bg-surface-alt">
-        <div className="p-4 space-y-3">
-          {/* Main inputs */}
-          <div className="bg-white rounded-xl shadow-sm border border-border p-3">
-            {mode.fields.map((field) => (
+        {/* Extra options */}
+        <div>
+          <SectionLabel>{lang === "de" ? "Zusatzoptionen" : "Extra Options"}</SectionLabel>
+          <Card>
+            <div className="flex flex-col" style={{ gap: "var(--gap)" }}>
               <InputField
-                key={field.key}
-                label={t(field.labelKey, lang)}
-                value={values[field.key] as string}
-                onChange={(v) => updateValue(field.key, v)}
-                suffix={getSuffix(field.suffixType)}
+                label={t("field.annualExtraPayment", lang)}
+                suffix={currencySymbol}
+                value={values.extraPayment}
+                onChange={(v) => updateValue("extraPayment", v)}
               />
-            ))}
-          </div>
+              <DateField
+                label={t("field.loanStartDate", lang)}
+                value={values.startDate}
+                onChange={(v) => updateValue("startDate", v)}
+              />
+            </div>
+          </Card>
+        </div>
 
-          {/* Extra options */}
-          <div className="bg-white rounded-xl shadow-sm border border-border p-3">
-            <InputField
-              label={t("field.annualExtraPayment", lang)}
-              value={values.extraPayment}
-              onChange={(v) => updateValue("extraPayment", v)}
-              suffix={currencySymbol}
-            />
-            <DateField
-              label={t("field.loanStartDate", lang)}
-              value={values.startDate}
-              onChange={(v) => updateValue("startDate", v)}
-            />
-          </div>
-
-          {/* Results */}
-          {result && (
-            <div className="bg-white rounded-xl shadow-sm border border-border p-4 space-y-2">
+        {/* Results */}
+        {result && result.schedule.length > 0 && (
+          <div>
+            <SectionLabel hint={lang === "de" ? "Live-Vorschau" : "Live preview"}>
+              {lang === "de" ? "Ergebnisse" : "Results"}
+            </SectionLabel>
+            <Card gradient>
+              <ResultRow label={t("result.monthlyPayment", lang)} value={fmtCur(result.monthlyPayment)} emphasis />
               <ResultRow label={t("result.totalPayment", lang)} value={fmtCur(result.totalPayment)} />
               <ResultRow label={t("result.totalInterest", lang)} value={fmtCur(result.totalInterest)} />
-              <ResultRow label={t("result.monthlyPayment", lang)} value={fmtCur(result.monthlyPayment)} />
-              {mode.id === "loanTerm" && (
-                <ResultRow label={t("result.loanTerm", lang)} value={formatMonths(result.loanTermMonths, lang)} />
-              )}
-              <ResultRow label={t("result.repaymentRate", lang)} value={`${formatPercent(result.repaymentRate, locale)} %`} />
+              <ResultRow label={t("result.loanTerm", lang)} value={formatMonths(result.loanTermMonths, lang)} />
+              <ResultRow label={t("result.repaymentRate", lang)} value={`${formatPercent(Math.max(0, result.repaymentRate), locale)} %`} />
               {result.schedule.length > 0 && (
                 <ResultRow
                   label={t("result.loanEndDate", lang)}
                   value={formatDate(result.schedule[result.schedule.length - 1].date, locale)}
+                  last
                 />
               )}
-            </div>
-          )}
-        </div>
+            </Card>
+          </div>
+        )}
 
-        {/* Buttons */}
-        <div className="p-4 pt-0 space-y-2.5 pb-6">
+        {/* Actions */}
+        <div className="flex flex-col gap-2.5 mt-1">
           <button
-            onClick={handleCalculate}
-            className="w-full py-3.5 bg-primary text-white font-bold rounded-xl
-                       hover:bg-primary-dark active:scale-[0.98] transition-all shadow-md"
-          >
-            {t("btn.calculate", lang)}
-          </button>
-          <button
-            onClick={handleShowSchedule}
-            className="w-full py-3.5 bg-primary-light text-white font-bold rounded-xl
-                       hover:bg-primary active:scale-[0.98] transition-all shadow-md"
+            onClick={onShowSchedule}
+            disabled={!result || result.schedule.length === 0}
+            className="w-full py-3.5 font-semibold tracking-wide text-[15px] transition-transform active:scale-[0.98] disabled:opacity-50"
+            style={{
+              background: "var(--color-primary)",
+              color: "var(--color-primary-ink)",
+              borderRadius: "var(--r-pill)",
+              border: "none",
+              cursor: !result ? "not-allowed" : "pointer",
+            }}
           >
             {t("btn.showSchedule", lang)}
           </button>
@@ -226,11 +198,88 @@ export default function CalculatorTab({ values, onValuesChange, onResult, onShow
   );
 }
 
-function ResultRow({ label, value }: { label: string; value: string }) {
+function ModeStrip({ activeMode, onChange, lang }: { activeMode: number; onChange: (i: number) => void; lang: "en" | "de" }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current?.querySelector(`[data-mode="${activeMode}"]`);
+    if (el) (el as HTMLElement).scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [activeMode]);
+
   return (
-    <div className="flex justify-between items-center">
-      <span className="text-sm text-text-secondary">{label}:</span>
-      <span className="text-sm font-semibold text-text">{value}</span>
+    <div
+      ref={ref}
+      className="flex gap-2 overflow-x-auto scrollbar-hide py-0.5 -mx-4 px-4"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {modes.map((m, i) => {
+        const active = i === activeMode;
+        return (
+          <button
+            key={m.id}
+            data-mode={i}
+            onClick={() => onChange(i)}
+            className="shrink-0 text-[13px] font-semibold whitespace-nowrap transition-all cursor-pointer"
+            style={{
+              padding: "9px 16px",
+              borderRadius: "var(--r-pill)",
+              background: active ? "var(--color-primary)" : "var(--color-surface)",
+              color: active ? "var(--color-primary-ink)" : "var(--color-text-secondary)",
+              border: active ? "none" : "1px solid var(--color-line)",
+            }}
+          >
+            {t(m.labelKey, lang)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
+  return (
+    <div className="flex justify-between items-baseline mb-2 px-1">
+      <div className="text-[11px] tracking-widest uppercase text-muted font-semibold">{children}</div>
+      {hint && <div className="text-[11px] text-muted">{hint}</div>}
+    </div>
+  );
+}
+
+function Card({ children, gradient }: { children: React.ReactNode; gradient?: boolean }) {
+  return (
+    <div
+      style={{
+        background: gradient
+          ? "linear-gradient(180deg, var(--color-surface), var(--color-surface-alt))"
+          : "var(--color-surface)",
+        borderRadius: "var(--r-lg)",
+        border: "1px solid var(--color-line)",
+        padding: "var(--pad)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ResultRow({ label, value, emphasis, last }: { label: string; value: string; emphasis?: boolean; last?: boolean }) {
+  return (
+    <div
+      className="flex justify-between items-baseline py-3 px-0.5"
+      style={{ borderBottom: last ? "none" : "1px dashed var(--color-line)" }}
+    >
+      <div className="text-sm text-text-secondary">{label}</div>
+      <div
+        className={emphasis ? "font-serif" : ""}
+        style={{
+          fontSize: emphasis ? 18 : 15,
+          fontWeight: emphasis ? 700 : 600,
+          color: emphasis ? "var(--color-primary)" : "var(--color-text)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }

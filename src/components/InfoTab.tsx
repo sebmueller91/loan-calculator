@@ -2,6 +2,31 @@
 
 import { useSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import { LogoMark } from "@/app/page";
+
+const FORMULAS = [
+  {
+    titleEn: "Monthly Payment",
+    titleDe: "Monatsrate",
+    expr: "M = L \u00B7 r / (1 \u2212 (1 + r)\u207B\u207F)",
+    descEn: "Annuity formula. L = principal, r = monthly rate, n = months.",
+    descDe: "Annuitatenformel. L = Darlehensbetrag, r = Monatszins, n = Monate.",
+  },
+  {
+    titleEn: "Total Interest",
+    titleDe: "Zinsen gesamt",
+    expr: "I = M \u00B7 n \u2212 L",
+    descEn: "Sum of all payments minus the original loan amount.",
+    descDe: "Summe aller Zahlungen minus ursprunglicher Darlehensbetrag.",
+  },
+  {
+    titleEn: "Remaining Debt",
+    titleDe: "Restschuld",
+    expr: "B(k) = L \u00B7 (1 + r)\u1D4F \u2212 M \u00B7 ((1 + r)\u1D4F \u2212 1) / r",
+    descEn: "Balance after k monthly payments have been made.",
+    descDe: "Restschuld nach k monatlichen Zahlungen.",
+  },
+];
 
 export default function InfoTab() {
   const { settings } = useSettings();
@@ -19,111 +44,146 @@ export default function InfoTab() {
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto bg-surface-alt">
-      <div className="p-5 space-y-5">
-        {/* App header */}
-        <div className="text-center py-6">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
+    <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-5.5 px-4 pt-1 pb-7">
+        {/* App identity */}
+        <div className="flex items-center gap-3.5 py-2 px-1">
+          <LogoMark size={56} />
+          <div>
+            <div className="font-serif text-[26px] font-medium text-text leading-tight">
+              {t("info.title", lang)}
+            </div>
+            <div className="text-xs text-muted mt-1" style={{ fontVariantNumeric: "tabular-nums" }}>
+              Version 2.4.0 &middot; Apr 2026
+            </div>
           </div>
-          <h1 className="text-xl font-bold text-text">{t("info.title", lang)}</h1>
-          <p className="text-sm text-text-secondary mt-1">v1.0.0</p>
         </div>
 
         {/* About */}
-        <Section title={t("info.about", lang)}>
-          <p className="text-sm text-text-secondary leading-relaxed">
-            {t("info.aboutText", lang)}
-          </p>
-        </Section>
+        <div>
+          <SectionLabel>{t("info.about", lang)}</SectionLabel>
+          <Card>
+            <p className="text-sm text-text-secondary leading-relaxed m-0">
+              {t("info.aboutText", lang)}
+            </p>
+          </Card>
+        </div>
 
         {/* Features */}
-        <Section title={t("info.features", lang)}>
-          <ul className="text-sm text-text-secondary space-y-2">
-            {features.map((text, i) => (
-              <Feature key={i} text={text} />
+        <div>
+          <SectionLabel hint={`${features.length} ${lang === "de" ? "Elemente" : "items"}`}>
+            {t("info.features", lang)}
+          </SectionLabel>
+          <Card noPad>
+            {features.map((f, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 px-4 py-3"
+                style={{ borderBottom: i === features.length - 1 ? "none" : "1px solid var(--color-line)" }}
+              >
+                <span
+                  className="shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center mt-0.5"
+                  style={{ background: "var(--color-primary-soft)", color: "var(--color-primary)" }}
+                >
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12.5l4.5 4.5L19 7" />
+                  </svg>
+                </span>
+                <span className="text-sm text-text leading-snug">{f}</span>
+              </div>
             ))}
-          </ul>
-        </Section>
+          </Card>
+        </div>
 
         {/* Formulas */}
-        <Section title={t("info.formulas", lang)}>
-          <div className="text-sm text-text-secondary space-y-3">
-            <FormulaBlock
-              title={t("info.formulaMonthlyPayment", lang)}
-              formula="M = P &times; r(1+r)^n / ((1+r)^n - 1)"
-              description={t("info.formulaDesc1", lang)}
-            />
-            <FormulaBlock
-              title={t("info.formulaLoanTerm", lang)}
-              formula="n = -log(1 - P&times;r/M) / log(1+r)"
-              description={t("info.formulaDesc2", lang)}
-            />
-            <FormulaBlock
-              title={t("info.formulaRemainingDebt", lang)}
-              formula="B = P(1+r)^n - M((1+r)^n - 1)/r"
-              description={t("info.formulaDesc3", lang)}
-            />
+        <div>
+          <SectionLabel>{t("info.formulas", lang)}</SectionLabel>
+          <Card noPad>
+            {FORMULAS.map((f, i) => (
+              <div
+                key={i}
+                className="p-4"
+                style={{ borderBottom: i === FORMULAS.length - 1 ? "none" : "1px solid var(--color-line)" }}
+              >
+                <div className="font-serif text-[15px] font-semibold text-text">
+                  {lang === "de" ? f.titleDe : f.titleEn}
+                </div>
+                <div
+                  className="text-[13px] text-primary mt-2 px-3 py-2"
+                  style={{
+                    fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+                    background: "var(--color-surface-alt)",
+                    borderRadius: "var(--r-sm)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {f.expr}
+                </div>
+                <div className="text-[12.5px] text-text-secondary mt-2 leading-relaxed">
+                  {lang === "de" ? f.descDe : f.descEn}
+                </div>
+              </div>
+            ))}
+          </Card>
+        </div>
+
+        {/* Source link */}
+        <a
+          href="https://github.com/sebmueller91/loan-calculator"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 p-4 no-underline text-text"
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-line)",
+            borderRadius: "var(--r-lg)",
+          }}
+        >
+          <span className="text-primary">
+            <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 19c-4 1.5-4-2-6-2.5" />
+              <path d="M15 22v-3.5a3 3 0 0 0-.9-2.3c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.7 4.7 0 0 0-.1-3.5s-1.1-.3-3.6 1.4a12.4 12.4 0 0 0-6.5 0C5.9 1.4 4.8 1.7 4.8 1.7a4.7 4.7 0 0 0-.1 3.5A5 5 0 0 0 3.3 8.7c0 5 3 6.2 6 6.5A3 3 0 0 0 8.4 18V22" />
+            </svg>
+          </span>
+          <div className="flex-1">
+            <div className="text-sm font-semibold">{t("info.githubRepo", lang)}</div>
+            <div className="text-[11px] text-muted">sebmueller91/loan-calculator</div>
           </div>
-        </Section>
-
-        {/* Source code */}
-        <Section title={t("info.sourceCode", lang)}>
-          <a
-            href="https://github.com/sebmueller91/loan-calculator"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-white rounded-lg border border-border hover:border-primary-light transition-colors"
-          >
-            <svg className="w-6 h-6 text-text" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+          <span className="text-muted">
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 5h5v5" /><path d="M19 5l-8 8" />
+              <path d="M19 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
             </svg>
-            <div>
-              <div className="text-sm font-semibold text-text">{t("info.githubRepo", lang)}</div>
-              <div className="text-xs text-text-secondary">sebmueller91/loan-calculator</div>
-            </div>
-            <svg className="w-4 h-4 text-text-secondary ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        </Section>
+          </span>
+        </a>
 
-        <p className="text-center text-xs text-text-secondary pb-4">
+        <div className="text-center text-[11px] text-muted pt-1.5">
           {t("info.builtWith", lang)}
-        </p>
+        </div>
       </div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-border p-4">
-      <h2 className="text-sm font-bold text-text mb-3">{title}</h2>
-      {children}
+    <div className="flex justify-between items-baseline mb-2 px-1">
+      <div className="text-[11px] tracking-widest uppercase text-muted font-semibold">{children}</div>
+      {hint && <div className="text-[11px] text-muted">{hint}</div>}
     </div>
   );
 }
 
-function Feature({ text }: { text: string }) {
+function Card({ children, noPad }: { children: React.ReactNode; noPad?: boolean }) {
   return (
-    <li className="flex items-start gap-2">
-      <svg className="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-      {text}
-    </li>
-  );
-}
-
-function FormulaBlock({ title, formula, description }: { title: string; formula: string; description: string }) {
-  return (
-    <div>
-      <div className="font-semibold text-text text-xs mb-0.5">{title}</div>
-      <code className="text-xs bg-surface-alt px-2 py-1 rounded block mb-0.5">{formula}</code>
-      <div className="text-xs text-text-secondary">{description}</div>
+    <div style={{
+      background: "var(--color-surface)",
+      borderRadius: "var(--r-lg)",
+      border: "1px solid var(--color-line)",
+      padding: noPad ? 0 : "var(--pad)",
+      overflow: noPad ? "hidden" : undefined,
+    }}>
+      {children}
     </div>
   );
 }
